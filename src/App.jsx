@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import data from "./data.json";
+import priceData from "./data.json";
 import axios from "axios";
 
 function App() {
+  const [data, setData] = useState(null);
+
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const startDateFormat = useMemo(
@@ -26,12 +28,14 @@ function App() {
 
   const [loading, setLoading] = useState(false);
 
-  // useEffect(() => {
-  //   axios
-  //     .get("/data.json")
-  //     .then((res) => console.log(res.data))
-  //     .catch((err) => console.log(err));
-  // }, [loading]);
+  const getData = () => {
+    setLoading(true);
+    setData(null);
+    setTimeout(() => {
+      setLoading(false);
+      setData(priceData);
+    }, 2000);
+  };
 
   return (
     <>
@@ -75,39 +79,44 @@ function App() {
         </div>
       </div>
       <div>
-        <button>Get Price Index</button>
+        <button onClick={getData}>Get Price Index</button>
       </div>
       <br />
-      <div className="flex-horizontal-2">
-        <div>
-          <div className="minmax-title">Max Price</div>
-          <div>Date : {data.high.date}</div>
-          <div>Price : {data.high.price}</div>
-        </div>
-        <div>
-          <div className="minmax-title">Min Price</div>
-          <div>Date : {data.low.date}</div>
-          <div>Price : {data.low.price}</div>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(data.bpi).map(([date, price]) => {
-            return (
-              <tr key={date}>
-                <td>{date}</td>
-                <td>{price}</td>
+      {loading && <div class="loader" />}
+      {data ? (
+        <>
+          <div className="flex-horizontal-2">
+            <div>
+              <div className="minmax-title">Max Price</div>
+              <div>Date : {data.high.date}</div>
+              <div>Price : {data.high.price}</div>
+            </div>
+            <div>
+              <div className="minmax-title">Min Price</div>
+              <div>Date : {data.low.date}</div>
+              <div>Price : {data.low.price}</div>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Price</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {Object.entries(data.bpi).map(([date, price]) => {
+                return (
+                  <tr key={date}>
+                    <td>{date}</td>
+                    <td>{price}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
+      ) : null}
     </>
   );
 }
